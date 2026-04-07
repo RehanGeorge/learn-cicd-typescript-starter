@@ -48,5 +48,3 @@ jobs:
       - name: Run lint check
         run: npm run lint --max-warnings=0
 
-      - name: Force failure
-        run: exit 1
