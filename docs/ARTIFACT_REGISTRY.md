@@ -36,3 +36,6 @@ Run and submit the CLI tests from the root of your repo.
 
 ### 6. Troubleshooting
 If the gcloud command responds with an error about permissions, simply check that the image was uploaded to the new registry. We will take care of permissions in a future step.
+
+### 7. Clean Up
+The actual artifact is stored on `notely-493010` in my `notely-ar-repo` under rehan.dev. Once done, make sure to delete these files.
