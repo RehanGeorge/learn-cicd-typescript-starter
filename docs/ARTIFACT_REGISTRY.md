@@ -7,13 +7,17 @@ Whenever we create a new version of Notely, we'll build it into a new Docker ima
 ## Assignment
 
 ### 1. Enable the Cloud Build API
+
 Search for and enable the Cloud Build API.
 
 ### 2. Set Up Artifact Registry
+
 Within Artifact Registry in the GCP console, enable the Artifact Registry API.
 
 ### 3. Create Repository
+
 Click Create Repository with the following settings:
+
 - **Name:** `notely-ar-repo`
 - **Format:** Docker
 - **Mode:** Standard
@@ -32,10 +36,13 @@ gcloud builds submit --tag REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG
 You can copy/paste your actual value for the tag from your Artifact Registry repo page in the GCP console.
 
 ### 5. Test
+
 Run and submit the CLI tests from the root of your repo.
 
 ### 6. Troubleshooting
+
 If the gcloud command responds with an error about permissions, simply check that the image was uploaded to the new registry. We will take care of permissions in a future step.
 
 ### 7. Clean Up
+
 The actual artifact is stored on `notely-493010` in my `notely-ar-repo` under rehan.dev. Once done, make sure to delete these files.
