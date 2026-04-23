@@ -78,6 +78,56 @@ This SQL shell is a great way to manually interact with your database for debugg
 
 Run and submit the CLI tests from the root of your repo.
 
+## Migrations
+
+Notely uses drizzle to manage database migrations, that is, the process of updating the database schema so that the server can function properly. Drizzle has already been added as a dependency and the initial schema files have been created. So we can focus purely on running migrations through CD.
+
+If you're interested in how this was configured you can check out [drizzle's getting started docs](https://orm.drizzle.team/docs/get-started).
+
+### Assignment
+
+1. On the Databases tab in Turso, click on your database and copy the URL. It should look something like this:
+   ```
+   libsql://notely-db-YOURNAME.turso.io
+   ```
+
+2. Paste it into a `.env` file in the root of your repo under the key `DATABASE_URL`.
+   The final connection configuration line will look something like this:
+   ```
+   DATABASE_URL=libsql://notely-db-YOURNAME.turso.io
+   ```
+
+3. Don't forget to add your `.env` file to your `.gitignore`
+
+4. Use the Turso CLI to get an authentication token:
+   ```bash
+   turso db tokens create notely-db
+   ```
+
+5. Add the token to your connection string in the `.env` file:
+   ```
+   DATABASE_URL=libsql://notely-db-YOURNAME.turso.io?authToken=YOURTOKENHERE
+   ```
+
+6. Run the migrations, I've added the commands to the package.json for you:
+   ```bash
+   npm run db:migrate
+   ```
+
+7. Once successful, use the Turso CLI to ensure the tables are there:
+   ```bash
+   turso db shell notely-db
+   ```
+   
+   Then run these queries:
+   ```sql
+   PRAGMA table_info(users);
+   
+   PRAGMA table_info(notes);
+   ```
+
+If everything looks good, you're ready to move on to the next lesson!
+
 ## Cleanup Instructions
 
 - The group was created in AWS Mumbai - name `main-group`
