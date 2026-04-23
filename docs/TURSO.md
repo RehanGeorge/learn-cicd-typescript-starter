@@ -128,7 +128,81 @@ If you're interested in how this was configured you can check out [drizzle's get
 
 If everything looks good, you're ready to move on to the next lesson!
 
+## Migrate Automatically
+
+There are many ways that teams handle database migrations in continuous deployment environments.
+
+Some teams prefer to run migrations as part of the deployment process, others run them manually, and some have more complete systems featuring downward migrations. Downward migrations provide one more tool for recovery in case of a problem with a recent database schema change. For simplicity, this course runs migrations via our GitHub Actions deployment script.
+
+We'll simply migrate the DB to the latest version every time we deploy. That way, if the code we're deploying requires a new schema, we'll always have it. The only time this can be a problem is if a migration makes backward-incompatible changes to the schema (like dropping a table). If the currently running application needs a table that we drop, it will stop working until the new code is deployed.
+
+That's bad, downtime is bad.
+
+To avoid those scenarios, we could simply roll out the code that stops relying on the hypothetical table first, then in the next deployment remove the table in a migration.
+
+### Assignment
+
+1. Add a `DATABASE_URL` secret to your GitHub repo's Settings → Secrets and variables → Actions. Double-check the URL itself as the migration will fail if quotes are used around the URL!
+
+2. Add a new section to the `cd.yml` deploy job, that grabs the secret and provides it to the rest of the job environment.
+
+   ```yaml
+   jobs:
+     deploy:
+       name: Deploy
+       runs-on: ubuntu-latest
+   
+       # This part
+       env:
+         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+   ```
+
+3. Update the cd workflow in your GitHub Actions `cd.yml` file to run migrations before deploying the application.
+   I'd recommend running it after the Docker image is built, but before the deployment of the image. That accomplishes two things:
+
+   - We won't run the migration if there is a problem building the image.
+   - The migration will be live before the new code is deployed.
+
+4. Use `git diff` / `git diff HEAD` to check for any sensitive credentials like database connection strings, that may have slipped into your source code. We've taken the liberty of `.gitignore`'ing the `.env` file already, but `git diff` can point out credentials mistakes even before you commit code changes.
+
+5. Commit the code, push it to GitHub, then make sure the workflow runs as expected.
+
+6. Paste the URL of your GitHub repo into the box and run the GitHub checks.
+
+## Using the DB
+
+Migrations are done! Now let's configure our Cloud Run app to use the database.
+
+### Assignment
+
+1. Go to the secrets manager in GCP (enable the API if you have to) and create a new secret:
+   - Name: `notely_db_password`
+   - Paste your database URL into the value field
+
+2. Go back to the Cloud Run page and select your app. Click "Edit & Deploy New Revision" and then under "Container(s)" → "Variables & Secrets" → "Reference A Secret". Supply the name `DATABASE_URL`. Select the `notely_db_password` secret. Select latest version. Select Done.
+
+3. Select Deploy. (We expect this deployment to fail with a permission error.)
+
+4. Back in the Google Cloud IAM & Admin dashboard, edit the Cloud Run Deployer service account and assign it a new role, Secret Manager Secret Accessor.
+
+5. Return to the Cloud Run notely service and edit the service once more. Select the Security tab. We want to use the Cloud Run Deployer service account.
+
+6. Select Deploy again. (This deployment should work better.)
+
+7. Let's test the application deployment.
+
+You'll know the app is fully operational when:
+
+- You can create new users
+- You can create new notes
+- Refreshing the page indicates that you are "logged in"
+- You can view notes that you create
+
+Run and submit the CLI tests and use the URL of your service (e.g. `bootdev config base_url https://test-vo4kpyh36a-uc.a.run.app/`).
+
 ## Cleanup Instructions
 
 - The group was created in AWS Mumbai - name `main-group`
 - The db created was named `notely-db`
+- Remember to shut down your notely project in GCP when you're done playing with it, to reduce extra bank charges.
+- Remember to delete your Turso database as well.
